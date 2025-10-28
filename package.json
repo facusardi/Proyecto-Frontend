@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "antd": "^5.27.6"
+    "antd": "^5.27.6",
+    "react-router-dom": "^7.9.4"
   }
 }
