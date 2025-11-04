@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import {Form, Input, Button, Card, Typography} from "antd"
+import Register from './Register'
 
 const {Title}= Typography
 const Login = ({ onLogin }) => {
@@ -7,8 +8,8 @@ const Login = ({ onLogin }) => {
 
   // Recibe los valores desde el antd Form
   const handleSubmit = (values) =>{
-    const { username, password } = values;
-    if (username === "elduko" && password === "eskere"){
+    const { apodo, password } = values;
+    if (apodo === "elduko" && password === "eskere"){
       if (typeof onLogin === 'function') onLogin();
       navigate("/");
     }else{
@@ -39,11 +40,11 @@ const Login = ({ onLogin }) => {
           initialValues={{ remember: true }}
         >
           <Form.Item
-            label="Usuario"
-            name="username"
-            rules={[{ required: true, message: "Por favor ingrese su usuario" }]}
+            label="apodo"
+            name="apodo"
+            rules={[{ required: true, message: "Por favor ingrese su apodo" }]}
           >
-            <Input placeholder="Ingrese su usuario" />
+            <Input placeholder="Ingrese su Apodo" />
           </Form.Item>
 
           <Form.Item
@@ -54,10 +55,13 @@ const Login = ({ onLogin }) => {
             <Input.Password placeholder="Ingrese su contraseña" />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item style={{justifyContent: "center", alignItems: "center", display: "flex", flexDirection: "column"}}>
             <Button type="primary" htmlType="submit" block>
               Iniciar sesión
             </Button>
+
+           <p>No tienes una cuenta? Regístrate  <a onClick={() => navigate('/register')}>aquí</a></p>
+
           </Form.Item>
         </Form>
       </Card>
