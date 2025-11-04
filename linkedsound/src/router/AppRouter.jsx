@@ -23,7 +23,7 @@ const AppRouter = () => {
   return (
     <Router>
         <Routes>
-            <Route element={<AppLayout />}>
+            <Route element={<AppLayout onLogout={handleLogout} />}>
             <Route path='/' element={isLoggedIn ? <Home onLogout={handleLogout}/>: <Navigate to="/login" replace/>}/>
             </Route>
             <Route path='/login' element={<Login onLogin={handleLogin}/>}/>
