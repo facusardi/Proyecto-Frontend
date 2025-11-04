@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { List, Card, Typography, Button, Input } from "antd";
+import { useState } from "react";
+import { List, Card, Typography, Button, Input, Modal } from "antd";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 
+
 const Colabs = () => {
   // Datos hardcodeados
-  const publicaciones = [
-    {
+  const [publicaciones, setPublicaciones] = useState([{
       titulo: "Busco productor para nueva canción",
       descripcion:
         "Soy artista independiente y busco productor con experiencia en música urbana.",
@@ -27,8 +27,20 @@ const Colabs = () => {
         "Estoy filmando un videoclip y necesito un fotógrafo o videógrafo interesado.",
       fecha_publicacion: "2025-10-25",
       usuario: "Carlos Gómez",
-    },
-  ];
+    },]);
+const[isModalOpen, setIsModalOpen]= useState(false)
+const showModal =()=>{
+  setIsModalOpen(true);
+}
+
+const handleOk =()=>{
+  setIsModalOpen(false);
+}
+const handleCancel =()=>{
+  setIsModalOpen(false);
+}
+
+
 
   // Estado de búsqueda
   const [busqueda, setBusqueda] = useState("");
@@ -44,16 +56,27 @@ const Colabs = () => {
   return (
     <div style={{ padding: "20px", maxWidth: 800, margin: "0 auto" }}>
       <Title level={2}>Publicaciones de Colaboración</Title>
-
       {/* Barra de búsqueda */}
-      <Search
+      <div style={{ display: "flex", justifyContent: "space-between", gap:'20px',margin: 30,}}>
+        <Search
         placeholder="Buscar por título, descripción o usuario..."
         allowClear
         enterButton="Buscar"
         size="large"
         onChange={(e) => setBusqueda(e.target.value)}
-        style={{ marginBottom: 30 }}
+        style={{flex:1 }}
       />
+      
+     <Button onClick={showModal} style={{height: "40px"}}>Crear colaboracion</Button>
+      <Modal title="Crear nueva colaboración" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Input placeholder="Título" style={{ marginBottom: 10 }} />
+        <Input.TextArea placeholder="Descripción" rows={4} style={{ marginBottom: 10 }} />
+        <Input placeholder="Usuario" style={{ marginBottom: 10 }} />
+      </Modal> 
+      </div>
+      
+      
+      
 
       {/* Lista de publicaciones */}
       <List
