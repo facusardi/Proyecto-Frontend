@@ -9,8 +9,8 @@ const Users = () => {
   const usuarios = [
     {
       id_User: 1,
-      Nombre: "Facundo",
-      Apellido: "Sardiña",
+      Nombre: "Mauro",
+      Apellido: " Lombardo",
       Apodo: "elduko",
       Rol_User: "Artista",
       Intereses: ["Producción musical", "Composición", "Freestyle"],
@@ -51,6 +51,8 @@ const Users = () => {
         alignItems: "center",
         padding: 40,
         background: "linear-gradient(to bottom, #f0f2f5, #ffffff)",
+        borderRadius: 8,
+        
       }}
     >
       <Title
@@ -70,8 +72,8 @@ const Users = () => {
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
         style={{
-          width: "60%",
-          maxWidth: 500,
+          width: "90%",
+          
           marginBottom: 30,
           borderRadius: 8,
           boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
