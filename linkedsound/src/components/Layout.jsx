@@ -12,6 +12,10 @@ const AppLayout = () => {
     { key: '1', label: <Link to="/">Home</Link> },
     { key: '2', label: <Link to="/colaboraciones">Colaboraciones</Link> },
     { key: '3', label: <Link to="/usuarios">Usuarios</Link> },
+    {key: '4', label:'Cerrar Sesion', onClick: () => {
+      localStorage.removeItem('token');
+      window.location.href = '/login'; // Redirige a la página de inicio de sesión
+    }}
   ]
 
   return (

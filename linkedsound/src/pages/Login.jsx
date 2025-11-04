@@ -24,7 +24,7 @@ const Login = ({ onLogin }) => {
         alignItems: "center",
         width: '100%',
         height: "100vh",
-        background: "#f0f2f5",
+        background: "linear-gradient(135deg, #001529 , #0c48a1)"
       }}
     >
       <Card style={{ width: 350, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
