@@ -12,7 +12,7 @@ const AppLayout = ({onLogout}) => {
     { key: '1', label: <Link to="/">Home</Link> },
     { key: '2', label: <Link to="/colaboraciones">Colaboraciones</Link> },
     { key: '3', label: <Link to="/usuarios">Usuarios</Link> },
-    {key: '4', label:'Cerrar Sesion', onClick: () => {onLogout();}}
+    { key: '4', label:'Cerrar Sesion', onClick: () => {onLogout();}}
   ]
 
   return (

@@ -25,14 +25,12 @@ const AppRouter = () => {
         <Routes>
             <Route element={<AppLayout onLogout={handleLogout} />}>
             <Route path='/' element={isLoggedIn ? <Home onLogout={handleLogout}/>: <Navigate to="/login" replace/>}/>
+            <Route path='/home' element={isLoggedIn ? <Home onLogout={handleLogout}/>: <Navigate to="/login" replace/>}/>
+              <Route path='/usuarios' element={isLoggedIn ? <Users onLogout={handleLogout}/>: <Navigate to="/login" replace/>}/>
+              <Route path='/colaboraciones' element={isLoggedIn ? <Colabs onLogout={handleLogout}/>: <Navigate to="/login" replace/>}/>
             </Route>
             <Route path='/login' element={<Login onLogin={handleLogin}/>}/>
-            
-            <Route element={<AppLayout />}>
-              <Route path='/home' element={<Home/>}/>
-              <Route path='/usuarios' element={<Users/>}/>
-              <Route path='/colaboraciones' element={<Colabs/>}/>
-            </Route>      
+
         </Routes>
     </Router>
     
