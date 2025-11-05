@@ -6,6 +6,7 @@ import Login from '../pages/Login';
 import Colabs from '../pages/Colabs';
 import AppLayout from '../components/Layout';
 import Users from '../pages/Users';
+import Register from '../pages/Register'
 
 const AppRouter = () => {
     const[isLoggedIn, setIsLoggedIn]= useState(()=>{
@@ -22,20 +23,16 @@ const AppRouter = () => {
     }
   return (
     <Router>
-        <Routes>
-            <Route element={<AppLayout />}>
-            <Route path='/' element={isLoggedIn ? <Home onLogout={handleLogout}/>: <Navigate to="/login" replace/>}/>
-            </Route>
-            <Route path='/login' element={<Login onLogin={handleLogin}/>}/>
-            
-            <Route element={<AppLayout />}>
-              <Route path='/home' element={<Home/>}/>
-              <Route path='/usuarios' element={<Users/>}/>
-              <Route path='/colaboraciones' element={<Colabs/>}/>
-            </Route>      
-        </Routes>
+      <Routes>
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/register" element={<Register onRegister={handleLogin} />} />
+        <Route element={<AppLayout onLogout={handleLogout} />}>
+          <Route index element={isLoggedIn ? <Home /> : <Navigate to="/login" replace />} />
+          <Route path="usuarios" element={isLoggedIn ? <Users /> : <Navigate to="/login" replace />} />
+          <Route path="colaboraciones" element={isLoggedIn ? <Colabs /> : <Navigate to="/login" replace />} />
+        </Route>
+      </Routes>
     </Router>
-    
   )
 }
 
