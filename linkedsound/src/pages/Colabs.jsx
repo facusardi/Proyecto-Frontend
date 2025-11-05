@@ -1,115 +1,72 @@
-import React, { useState, useEffect } from 'react'
-import { Form, Input, DatePicker, Button, Table, message } from 'antd'
-import { supabase } from '../config/supabase'
+import React, { useEffect, useState } from 'react';
+import { Table, Form, Input, DatePicker, Button, message } from 'antd';
+import api from '../config/api';
 
-function Colabs() {
-  const [colabs, setColabs] = useState([])
-
-  useEffect(() => {
-    fetchColabs()
-  }, [])
+const Colabs = () => {
+  const [colabs, setColabs] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchColabs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('Aviso_Colabro')
-        .select(`
-          *,
-          Usuario:id_User (Nombre, Apodo)
-        `)
-      
-      if (error) throw error
-      setColabs(data)
-    } catch (error) {
-      message.error('Error al cargar colaboraciones')
+      setLoading(true);
+      const { data } = await api.get('/colabs');
+      setColabs(data);
+    } catch (err) {
+      message.error('Error al cargar colaboraciones');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const handleSubmit = async (values) => {
+  useEffect(() => { fetchColabs() }, []);
+
+  const onFinish = async (values) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      const { error } = await supabase
-        .from('Aviso_Colabro')
-        .insert({
-          id_User: user.id,
-          Descripcion: values.descripcion,
-          Fecha: values.fecha.toISOString(),
-          Ubi: values.ubicacion
-        })
-
-      if (error) throw error
-      message.success('Colaboración publicada correctamente')
+      const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+      const payload = {
+        id_User: currentUser?.id_User || null,
+        Descripcion: values.descripcion,
+        Fecha: values.fecha ? values.fecha.toISOString() : null,
+        Ubi: values.ubicacion
+      }
+      await api.post('/colabs', payload)
+      message.success('Colaboración creada')
       fetchColabs()
-    } catch (error) {
-      message.error('Error al publicar colaboración')
+    } catch (err) {
+      message.error(err.response?.data?.message || 'Error al crear colaboración')
     }
-  }
+  };
 
   const columns = [
-    {
-      title: 'Usuario',
-      dataIndex: ['Usuario', 'Apodo'],
-      key: 'usuario'
-    },
-    {
-      title: 'Descripción',
-      dataIndex: 'Descripcion',
-      key: 'descripcion'
-    },
-    {
-      title: 'Ubicación',
-      dataIndex: 'Ubi',
-      key: 'ubicacion'
-    },
-    {
-      title: 'Fecha',
-      dataIndex: 'Fecha',
-      key: 'fecha',
-      render: (text) => new Date(text).toLocaleDateString()
-    }
+    { title: 'Usuario', dataIndex: ['Usuario','Apodo'], key: 'usuario', render: (_, record) => record.Usuario?.Apodo || 'Anónimo' },
+    { title: 'Descripción', dataIndex: 'Descripcion', key: 'descripcion' },
+    { title: 'Ubicación', dataIndex: 'Ubi', key: 'ubi' },
+    { title: 'Fecha', dataIndex: 'Fecha', key: 'fecha', render: (d) => d ? new Date(d).toLocaleDateString() : '' }
   ]
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: 24 }}>
+    <div style={{ padding: 24 }}>
       <h1>Colaboraciones</h1>
-      
-      <Form onFinish={handleSubmit} layout="vertical">
-        <Form.Item
-          name="descripcion"
-          label="Descripción"
-          rules={[{ required: true }]}
-        >
+
+      <Form layout="vertical" onFinish={onFinish} style={{ maxWidth: 700 }}>
+        <Form.Item name="descripcion" label="Descripción" rules={[{ required: true }]}>
           <Input.TextArea />
         </Form.Item>
 
-        <Form.Item
-          name="ubicacion"
-          label="Ubicación"
-          rules={[{ required: true }]}
-        >
+        <Form.Item name="ubicacion" label="Ubicación" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item
-          name="fecha"
-          label="Fecha"
-          rules={[{ required: true }]}
-        >
+        <Form.Item name="fecha" label="Fecha">
           <DatePicker />
         </Form.Item>
 
-        <Button type="primary" htmlType="submit">
-          Publicar colaboración
-        </Button>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">Publicar colaboración</Button>
+        </Form.Item>
       </Form>
 
-      <Table 
-        dataSource={colabs} 
-        columns={columns}
-        style={{ marginTop: 24 }}
-        rowKey="id_Avi"
-      />
+      <Table dataSource={colabs} columns={columns} rowKey="id_Avi" loading={loading} style={{ marginTop: 24 }} />
     </div>
   )
 }
