@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import {Form, Input, Button, Card, Typography} from "antd"
 import React from 'react'
+import { message } from 'antd' // <-- asegurar import
 import api from '../config/api'
-import { message } from 'antd' // <-- agregar esto
 import Register from './Register'
 
 const {Title}= Typography
@@ -12,14 +12,18 @@ const Login = ({ onLogin }) => {
   // Recibe los valores desde el antd Form
   const handleSubmit = async (values) => {
     try {
-      // Asegurate de usar las keys que espera el backend: Email y Password
-      const res = await api.post('/auth/login', { Email: values.email, Password: values.password })
+      // values puede venir como { apodo, password } o { email, password }
+      const payload = {
+        Email: values.email || values.apodo || null,
+        Apodo: values.apodo || null,
+        Password: values.password
+      }
+      const res = await api.post('/auth/login', payload)
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
       message.success('Inicio de sesión correcto')
       navigate('/')
     } catch (err) {
-      // mostrar mensaje de error seguro
       const text = err.response?.data?.message || err.message || 'Error al iniciar sesión'
       message.error(text)
       console.error('Login error:', err.response?.data || err)
