@@ -108,7 +108,7 @@ const Home = () => {
       <h1 style={{ fontSize: '3rem', marginBottom: 8 }}>Home</h1>
       
       <div style={{ marginBottom: 24, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
-        <p>Bienvenido, <strong>{user.Nombre || user.Apodo}</strong>!</p>
+        <p>Bienvenido, <strong>{ user.Apodo}</strong>!</p>
         <p><strong>Email:</strong> {user.Email}</p>
         
         <div style={{ marginTop: 16 }}>
