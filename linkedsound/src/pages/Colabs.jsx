@@ -29,9 +29,11 @@ const Colabs = () => {
         Fecha: values.fecha ? values.fecha.toISOString() : null,
         Ubi: values.ubicacion
       }
-      await api.post('/colabs', payload)
+      const resp = await api.post('/colabs', payload)
+      if(resp.status === 201){
       message.success('Colaboración creada')
       fetchColabs()
+      }
     } catch (err) {
       message.error(err.response?.data?.message || 'Error al crear colaboración')
     }
