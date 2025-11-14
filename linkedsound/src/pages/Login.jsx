@@ -19,11 +19,16 @@ const Login = ({ onLogin }) => {
         Password: values.password
       }
       const res = await api.post('/auth/login', payload)
+      if(res.status === 200 && onLogin){
+      onLogin()
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
       message.success('Inicio de sesión correcto')
       navigate('/')
-    } catch (err) {
+      }
+    } 
+    
+    catch (err) {
       const text = err.response?.data?.message || err.message || 'Error al iniciar sesión'
       message.error(text)
       console.error('Login error:', err.response?.data || err)
@@ -53,11 +58,12 @@ const Login = ({ onLogin }) => {
           initialValues={{ remember: true }}
         >
           <Form.Item
-            label="apodo"
-            name="apodo"
-            rules={[{ required: true, message: "Por favor ingrese su apodo" }]}
+            label="email"
+            name="email"
+            rules={[{ required: true, message: "Por favor ingrese su email" }]}
           >
-            <Input placeholder="Ingrese su Apodo" />
+            <Input placeholder="Ingrese su email" aria-required="true"
+       autoComplete="email"/>
           </Form.Item>
 
           <Form.Item
@@ -65,7 +71,8 @@ const Login = ({ onLogin }) => {
             name="password"
             rules={[{ required: true, message: "Por favor ingrese su contraseña" }]}
           >
-            <Input.Password placeholder="Ingrese su contraseña" />
+            <Input.Password placeholder="Ingrese su contraseña" aria-required="true"
+       autoComplete="current-password" />
           </Form.Item>
 
           <Form.Item style={{justifyContent: "center", alignItems: "center", display: "flex", flexDirection: "column"}}>
