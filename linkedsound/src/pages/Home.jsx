@@ -6,10 +6,18 @@ const Home = () => {
   const [userIntereses, setUserIntereses] = useState([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
+  const [refreshKey, setRefreshKey] = useState(0) // 🔄 Contador para forzar refresh
 
   useEffect(() => {
     checkSession()
   }, [])
+
+  // 🔄 Re-fetch cuando cambia refreshKey
+  useEffect(() => {
+    if (user?.id_User && refreshKey > 0) {
+      fetchUserIntereses(user.id_User)
+    }
+  }, [refreshKey])
 
   const checkSession = () => {
     const storedUser = localStorage.getItem('user')
@@ -76,6 +84,12 @@ const Home = () => {
     }
   }
 
+  // 🔄 Función para incrementar el contador y forzar refresh
+  const handleInteresesUpdated = () => {
+    console.log('🔄 Refrescando intereses después de guardar...')
+    setRefreshKey(prev => prev + 1)
+  }
+
   if (loading) {
     return <div style={{ padding: 24 }}>Cargando...</div>
   }
@@ -96,24 +110,28 @@ const Home = () => {
       <div style={{ marginBottom: 24, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
         <p>Bienvenido, <strong>{user.Nombre || user.Apodo}</strong>!</p>
         <p><strong>Email:</strong> {user.Email}</p>
-        <p><strong>Intereses: {userIntereses.length > 0 ? (
-          <ul style={{ fontSize: '1.1rem' }}>
-            {userIntereses.map((interes, index) => (
-              <li key={index}>{interes}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No has seleccionado intereses aún. ¡Agrega algunos abajo!</p>
-        )}
-        </strong></p>
-      
-      </div>
-      <div style={{ marginBottom: 24 }}>
         
-        
+        <div style={{ marginTop: 16 }}>
+          <strong>Intereses ({userIntereses.length}):</strong>
+          {userIntereses.length > 0 ? (
+            <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+              {userIntereses.map((interes, index) => (
+                <li key={index}>{interes}</li>
+              ))}
+            </ul>
+          ) : (
+            <p style={{ fontStyle: 'italic', color: '#888' }}>
+              No has seleccionado intereses aún. ¡Agrega algunos abajo!
+            </p>
+          )}
+        </div>
       </div>
 
-      <Intereses />
+      {/* Key prop fuerza a React a recrear el componente cuando cambia */}
+      <Intereses 
+        key={refreshKey} 
+        onInteresesUpdated={handleInteresesUpdated} 
+      />
     </div>
   )
 }

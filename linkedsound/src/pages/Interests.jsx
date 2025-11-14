@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { Form, Select, Button, message } from 'antd'
 import { supabase } from '../config/supabase'
 
-const Intereses = () => {
+const Intereses = ({ onInteresesUpdated }) => {
   const [intereses, setIntereses] = useState([])
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetchIntereses()
@@ -51,6 +52,8 @@ const Intereses = () => {
       return
     }
 
+    setSaving(true)
+
     try {
       console.log('📤 Guardando intereses para usuario:', user.id_User)
       console.log('📤 Intereses seleccionados:', values.intereses)
@@ -88,9 +91,22 @@ const Intereses = () => {
 
       console.log('✅ Intereses insertados:', insertData)
       message.success('Intereses guardados correctamente')
+      
+      // 🔄 IMPORTANTE: Esperar un poco antes de notificar para asegurar que la BD se actualizó
+      setTimeout(() => {
+        console.log('🔄 Notificando al padre para refrescar...')
+        if (onInteresesUpdated && typeof onInteresesUpdated === 'function') {
+          onInteresesUpdated()
+        } else {
+          console.warn('⚠️ onInteresesUpdated no es una función válida')
+        }
+      }, 500)
+
     } catch (error) {
       console.error('❌ Error completo al guardar:', error)
       message.error(`Error al guardar intereses: ${error.message}`)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -99,7 +115,7 @@ const Intereses = () => {
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: 24 }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
       <h2>Selecciona tus intereses</h2>
       {!user && (
         <p style={{ color: 'orange' }}>
@@ -118,11 +134,19 @@ const Intereses = () => {
               label: i.Nombre, 
               value: i.Intereses_ID 
             }))}
-            disabled={!user}
+            disabled={!user || saving}
+            size="large"
           />
         </Form.Item>
-        <Button type="primary" htmlType="submit" disabled={!user}>
-          Guardar intereses
+        <Button 
+          type="primary" 
+          htmlType="submit" 
+          disabled={!user || saving}
+          loading={saving}
+          size="large"
+          block
+        >
+          {saving ? 'Guardando...' : 'Guardar intereses'}
         </Button>
       </Form>
     </div>
