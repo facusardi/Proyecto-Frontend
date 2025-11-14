@@ -8,81 +8,96 @@ const Home = () => {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    // Verifica la sesión inicial
     checkSession()
   }, [])
 
   const checkSession = () => {
-  const storedUser = localStorage.getItem('user')
-  console.log('🔍 Raw localStorage user:', storedUser)
-  
-  if (storedUser) {
-    try {
-      const userData = JSON.parse(storedUser)
-      console.log('🔍 Usuario parseado en Home:', userData)
-      console.log('🔍 Propiedades del usuario:', Object.keys(userData))
-      console.log('🔍 id_User:', userData.id_User)
-      
-      setUser(userData)
-      
-      if (userData.id_User) {
-        fetchUserIntereses(userData.id_User)
-      } else {
-        console.error('❌ El usuario no tiene id_User')
+    const storedUser = localStorage.getItem('user')
+    console.log('🔍 Raw localStorage user:', storedUser)
+    
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        console.log('🔍 Usuario parseado en Home:', userData)
+        console.log('🔍 Propiedades del usuario:', Object.keys(userData))
+        console.log('🔍 id_User:', userData.id_User)
+        
+        setUser(userData)
+        
+        if (userData.id_User) {
+          fetchUserIntereses(userData.id_User)
+        } else {
+          console.error('❌ El usuario no tiene id_User')
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('❌ Error al parsear usuario:', error)
         setLoading(false)
       }
-    } catch (error) {
-      console.error('❌ Error al parsear usuario:', error)
+    } else {
+      console.log('❌ No hay usuario en localStorage')
       setLoading(false)
     }
-  } else {
-    console.log('❌ No hay usuario en localStorage')
-    setLoading(false)
   }
-}
 
   const fetchUserIntereses = async (userId) => {
-  try {
-    const { data, error } = await supabase
-      .from('Intereses')
-      .select(`
-        Intereses_ID,
-        Tipo_De_Intereses (
-          Nombre
-        )
-      `)
-      .eq('id_User', userId)  // ⚠️ Minúscula: id_User
+    try {
+      console.log('📥 Buscando intereses para usuario:', userId)
+      
+      const { data, error } = await supabase
+        .from('Intereses')
+        .select(`
+          Intereses_ID,
+          id_User,
+          Tipo_De_Intereses (
+            Intereses_ID,
+            Nombre
+          )
+        `)
+        .eq('id_User', userId)
 
-    if (error) throw error
+      if (error) {
+        console.error('❌ Error en consulta de intereses:', error)
+        throw error
+      }
 
-    const interesesNombres = data
-      .map(item => item.Tipo_De_Intereses?.Nombre)
-      .filter(Boolean)
-    
-    setUserIntereses(interesesNombres)
-  } catch (error) {
-    console.error('Error al cargar intereses del usuario:', error)
-  } finally {
-    setLoading(false)
+      console.log('📥 Datos recibidos:', data)
+
+      const interesesNombres = data
+        .map(item => item.Tipo_De_Intereses?.Nombre)
+        .filter(Boolean)
+      
+      console.log('✅ Intereses procesados:', interesesNombres)
+      setUserIntereses(interesesNombres)
+    } catch (error) {
+      console.error('❌ Error al cargar intereses del usuario:', error)
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   if (loading) {
     return <div style={{ padding: 24 }}>Cargando...</div>
   }
 
   if (!user) {
-    return <div style={{ padding: 24 }}>Debes iniciar sesión para acceder a esta página. <a href="/login">Ir a login</a></div>
+    return (
+      <div style={{ padding: 24 }}>
+        <p>Debes iniciar sesión para acceder a esta página.</p>
+        <a href="/login">Ir a login</a>
+      </div>
+    )
   }
 
   return (
     <div style={{ padding: 24 }}>
       <h1 style={{ fontSize: '3rem', marginBottom: 8 }}>Home</h1>
       
-      <div style={{ marginBottom: 24 }}>
-        <h2>Tus intereses actuales:</h2>
-        {userIntereses.length > 0 ? (
-          <ul>
+      <div style={{ marginBottom: 24, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
+        <p>Bienvenido, <strong>{user.Nombre || user.Apodo}</strong>!</p>
+        <p><strong>Email:</strong> {user.Email}</p>
+        <p><strong>Intereses: {userIntereses.length > 0 ? (
+          <ul style={{ fontSize: '1.1rem' }}>
             {userIntereses.map((interes, index) => (
               <li key={index}>{interes}</li>
             ))}
@@ -90,6 +105,12 @@ const Home = () => {
         ) : (
           <p>No has seleccionado intereses aún. ¡Agrega algunos abajo!</p>
         )}
+        </strong></p>
+      
+      </div>
+      <div style={{ marginBottom: 24 }}>
+        
+        
       </div>
 
       <Intereses />
