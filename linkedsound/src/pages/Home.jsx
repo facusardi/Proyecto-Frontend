@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../config/supabase'
 import Intereses from './Interests'
+import { getUserIntereses } from '../config/api'
 
 const Home = () => {
   const [userIntereses, setUserIntereses] = useState([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
-  const [refreshKey, setRefreshKey] = useState(0) // 🔄 Contador para forzar refresh
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     checkSession()
   }, [])
 
-  // 🔄 Re-fetch cuando cambia refreshKey
   useEffect(() => {
     if (user?.id_User && refreshKey > 0) {
       fetchUserIntereses(user.id_User)
@@ -52,39 +51,23 @@ const Home = () => {
     try {
       console.log('📥 Buscando intereses para usuario:', userId)
       
-      const { data, error } = await supabase
-        .from('Intereses')
-        .select(`
-          Intereses_ID,
-          id_User,
-          Tipo_De_Intereses (
-            Intereses_ID,
-            Nombre
-          )
-        `)
-        .eq('id_User', userId)
-
-      if (error) {
-        console.error('❌ Error en consulta de intereses:', error)
-        throw error
-      }
-
-      console.log('📥 Datos recibidos:', data)
-
-      const interesesNombres = data
-        .map(item => item.Tipo_De_Intereses?.Nombre)
-        .filter(Boolean)
+      const response = await getUserIntereses(userId)
       
-      console.log('✅ Intereses procesados:', interesesNombres)
-      setUserIntereses(interesesNombres)
+      if (response.success) {
+        console.log('✅ Intereses recibidos:', response.data)
+        setUserIntereses(response.data)
+      } else {
+        console.error('❌ Error en respuesta:', response.error)
+        setUserIntereses([])
+      }
     } catch (error) {
       console.error('❌ Error al cargar intereses del usuario:', error)
+      setUserIntereses([])
     } finally {
       setLoading(false)
     }
   }
 
-  // 🔄 Función para incrementar el contador y forzar refresh
   const handleInteresesUpdated = () => {
     console.log('🔄 Refrescando intereses después de guardar...')
     setRefreshKey(prev => prev + 1)
@@ -108,7 +91,7 @@ const Home = () => {
       <h1 style={{ fontSize: '3rem', marginBottom: 8 }}>Home</h1>
       
       <div style={{ marginBottom: 24, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
-        <p>Bienvenido, <strong>{ user.Apodo}</strong>!</p>
+        <p>Bienvenido, <strong>{user.Apodo}</strong>!</p>
         <p><strong>Email:</strong> {user.Email}</p>
         
         <div style={{ marginTop: 16 }}>
@@ -127,7 +110,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Key prop fuerza a React a recrear el componente cuando cambia */}
       <Intereses 
         key={refreshKey} 
         onInteresesUpdated={handleInteresesUpdated} 

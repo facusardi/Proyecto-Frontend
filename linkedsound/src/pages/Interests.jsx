@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Form, Select, Button, message } from 'antd'
-import { supabase } from '../config/supabase'
+import { getTiposIntereses, saveUserIntereses } from '../config/api'
 
 const Intereses = ({ onInteresesUpdated }) => {
   const [intereses, setIntereses] = useState([])
@@ -32,13 +32,15 @@ const Intereses = ({ onInteresesUpdated }) => {
 
   const fetchIntereses = async () => {
     try {
-      const { data, error } = await supabase
-        .from('Tipo_De_Intereses')
-        .select('*')
+      console.log('📥 Obteniendo tipos de intereses desde backend...')
+      const response = await getTiposIntereses()
       
-      if (error) throw error
-      console.log('✅ Intereses disponibles:', data)
-      setIntereses(data)
+      if (response.success) {
+        console.log('✅ Tipos de intereses recibidos:', response.data)
+        setIntereses(response.data)
+      } else {
+        throw new Error(response.error || 'Error al cargar intereses')
+      }
     } catch (error) {
       console.error('❌ Error al cargar intereses:', error)
       message.error('Error al cargar intereses')
@@ -58,49 +60,23 @@ const Intereses = ({ onInteresesUpdated }) => {
       console.log('📤 Guardando intereses para usuario:', user.id_User)
       console.log('📤 Intereses seleccionados:', values.intereses)
 
-      // Elimina intereses anteriores
-      const { error: deleteError } = await supabase
-        .from('Intereses')
-        .delete()
-        .eq('id_User', user.id_User)
-      
-      if (deleteError) {
-        console.error('❌ Error al eliminar intereses antiguos:', deleteError)
-        throw deleteError
+      const response = await saveUserIntereses(user.id_User, values.intereses)
+
+      if (response.success) {
+        console.log('✅ Respuesta del servidor:', response)
+        message.success('Intereses guardados correctamente')
+        
+        setTimeout(() => {
+          console.log('🔄 Notificando al padre para refrescar...')
+          if (onInteresesUpdated && typeof onInteresesUpdated === 'function') {
+            onInteresesUpdated()
+          } else {
+            console.warn('⚠️ onInteresesUpdated no es una función válida')
+          }
+        }, 500)
+      } else {
+        throw new Error(response.error || 'Error al guardar')
       }
-
-      console.log('✅ Intereses antiguos eliminados')
-      
-      // Inserta nuevos intereses
-      const interesesToInsert = values.intereses.map(interes_id => ({
-        id_User: user.id_User,
-        Intereses_ID: interes_id
-      }))
-
-      console.log('📤 Insertando intereses:', interesesToInsert)
-
-      const { data: insertData, error: insertError } = await supabase
-        .from('Intereses')
-        .insert(interesesToInsert)
-        .select()
-
-      if (insertError) {
-        console.error('❌ Error al insertar:', insertError)
-        throw insertError
-      }
-
-      console.log('✅ Intereses insertados:', insertData)
-      message.success('Intereses guardados correctamente')
-      
-      // 🔄 IMPORTANTE: Esperar un poco antes de notificar para asegurar que la BD se actualizó
-      setTimeout(() => {
-        console.log('🔄 Notificando al padre para refrescar...')
-        if (onInteresesUpdated && typeof onInteresesUpdated === 'function') {
-          onInteresesUpdated()
-        } else {
-          console.warn('⚠️ onInteresesUpdated no es una función válida')
-        }
-      }, 500)
 
     } catch (error) {
       console.error('❌ Error completo al guardar:', error)
